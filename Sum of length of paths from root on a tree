@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define pii pair<int,int>
+int parent[100005];
+int height[100005];
+int c[100005];
+int s[100005];
+void dfs (vector<vector<pii>> &adj, int r) {
+    for (int i=0; i<adj[r].size(); i++) {
+        int v=adj[r][i].first;
+        if (v==parent[r]) continue;
+        parent[v]=r;
+        height[v]=height[r]+adj[r][i].second;
+        dfs(adj,v);
+        c[r]+=c[v];
+    }
+    c[r]++;
+    return;
+}
+void prefix_sum (vector<vector<pii>> &adj, int r) {
+    for (int i=0; i<adj[r].size(); i++) {
+        int v=adj[r][i].first;
+        if (v==parent[r]) continue;
+        s[v]=s[r]+c[v]*(height[v]-height[r]);
+        prefix_sum(adj,v);
+    }
+    return;
+}
+int main()
+{
+    int n;
+    cin >> n;
+    vector<vector<pii>> adj(n+1);
+    for (int i=0; i<n-1; i++) {
+        int u,v,w;
+        cin >> u >> v >> w;
+        adj[u].push_back({v,w});
+        adj[v].push_back({u,w});
+    }
+    dfs(adj, 1);
+    prefix_sum(adj,1);
+    int maxf=0;
+    int c=0;
+    for (int i=1; i<=n; i++) {
+        c+=height[i];
+        maxf=max(maxf,n*height[i]-2*s[i]);
+    }
+    cout << maxf+c;
+}
